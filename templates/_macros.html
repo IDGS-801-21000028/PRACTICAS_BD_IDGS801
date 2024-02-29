@@ -1,0 +1,20 @@
+{% macro datos(name,placeholder,type='text') %}
+
+  <label for="{{name}}">{{name}}</label>
+  <input type="{{type}}" name="{{name}}" id="{{name}}" placeholder="{{placeholder}}">
+
+{% endmacro %}
+
+{% macro camposNuevos(field) %}
+
+<label style="text-transform: capitalize;">{{field.label}}</label>
+<div>{{field(**kwargs) | safe}}</div>
+{% if field.errors %}
+  <ul style="list-style: none;">
+    {% for error in field.errors %}
+      <li style="color:red">{{error}}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+  
+{% endmacro %}
