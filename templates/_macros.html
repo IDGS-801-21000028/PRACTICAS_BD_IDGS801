@@ -1,20 +1,70 @@
-{% macro datos(name,placeholder,type='text') %}
-
-  <label for="{{name}}">{{name}}</label>
-  <input type="{{type}}" name="{{name}}" id="{{name}}" placeholder="{{placeholder}}">
-
+{% macro datos(field) %}  
+  {{field(**kwargs) | safe}}
+  <label for="{{field.id}}">{{field.label.text}}</label>
+  {% if field.errors %}
+    <ul style="list-style: none;">
+      {% for error in field.errors %}
+        <li style="color:red; font-size: 12px" class="fw-bold">{{error}}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
 {% endmacro %}
 
 {% macro camposNuevos(field) %}
 
-<label style="text-transform: capitalize;">{{field.label}}</label>
-<div>{{field(**kwargs) | safe}}</div>
-{% if field.errors %}
-  <ul style="list-style: none;">
-    {% for error in field.errors %}
-      <li style="color:red">{{error}}</li>
-    {% endfor %}
-  </ul>
-{% endif %}
+  <label class="text-capitalize">{{field.label.text}}</label>
+  <div>
+    {{field(**kwargs) | safe}}
+  </div>
+
+  {% if field.errors %}
+    <ul style="list-style: none;">
+      {% for error in field.errors %}
+        <li style="color:red; font-size: 12px" class="fw-bold">{{error}}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  
+{% endmacro %}
+
+{% macro floatLabelField(field) %}
+  <div class="form-floating mb-1">
+    {% set input_class = 'form-control is-invalid' if field.errors else 'form-control' %}
+    {{ field(class=input_class, **kwargs) }}
+    {{ field.label(class='form-label text-uppercase') }}    
+    {% if field.errors %}
+    <ul style="list-style: none;">
+      {% for error in field.errors %}
+        <li style="color:red; font-size: 12px" class="fw-bold">{{error}}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro btn(field) %}
+  {{field(**kwargs) | safe}}  
+{% endmacro %}
+
+{% macro checkbox(field) %}
+  <div class="d-flex justify-content-center align-items-center">
+    <label class="text-capitalize">{{field.label}}</label>
+    <div class="form-check d-flex gap-1 px-2" id="{{ field.id }}">
+      {% for subfield in field %}
+        <div>
+          {{subfield(**kwargs) | safe}}
+          <label class="btn btn-outline-primary" for="{{ subfield.id }}">{{ subfield.label.text }}</label>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if field.errors %}
+    <ul style="list-style: none;">
+      {% for error in field.errors %}
+        <li style="color:red">{{error}}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
   
 {% endmacro %}

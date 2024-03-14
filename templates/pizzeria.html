@@ -1,0 +1,160 @@
+{% extends "layout.html" %}
+
+{% block container %}
+{% import '_macros.html' as macros %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pizzeria.css') }}">
+<h1 class="text-center text-uppercase">Pizzeria</h1>
+<div class="col-md-12 p-0">
+  <form name="sent" action="/pizzeria" method="POST" novalidate id="formSent">
+    <div class="d-flex control-group p-2">
+      <div class="col-md-4 p-1">
+        <div class="col-md-12">
+          {{macros.floatLabelField(form.nombre, placeholder="")}}
+        </div>
+        <div class="col-md-12">
+          {{macros.camposNuevos(form.tamanio, class="list-unstyled form-check")}}
+        </div>
+      </div>
+      <div class="col-md-4 p-1">
+        <div class="col-md-12">
+          {{macros.floatLabelField(form.direccion, placeholder="")}}
+        </div>
+        <div class="col-md-12">
+          {{macros.camposNuevos(form.ingr, class="list-unstyled form-check")}}
+        </div>
+      </div>
+      <div class="col-md-4 p-1">
+        <div class="col-md-12">
+          {{macros.floatLabelField(form.telefono, placeholder="")}}
+        </div>
+        <div class="d-flex">
+          <div class="col-md-6">
+            {{macros.floatLabelField(form.numPizzas, placeholder="")}}
+          </div>
+          <div class="col-md-6" style="padding-left: .25rem;">
+            {{macros.floatLabelField(form.fechaCompra, placeholder="")}}
+          </div>
+        </div>
+        <div class="col-md-12">
+          {{macros.btn(form.agregar, class="btn btn-success col-md-12")}}
+        </div>
+      </div>
+    </div>
+    <div class="d-flex">
+      <div class="col-md-6 p-1">
+        <div class="table-container">
+          <table class="table table-bordered table-striped table-responsive-md shadow">
+            <thead class="table-dark">
+              <tr>
+                <th>Tamaño</th>
+                <th>Ingredientes</th>
+                <th>Número de Pizzas</th>
+                <th>Subtotal</th>
+                <th>Seleccionar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for index in range(ordenes|length) %}
+              {% set orden = ordenes[index] %}
+              <tr class="fila-orden">
+                <td>{{orden.tamanio}}</td>
+                <td>{{orden.ingredientes}}</td>
+                <td>{{orden.numeroPizzas}}</td>
+                <td>{{orden.subtotal}}</td>
+                <td style="padding: 0; position:relative;">
+                  <input type="radio" name="ordenes_seleccionadas" value="{{ index }}" id="orden-{{index}}">
+                  <label for="orden-{{ index }}" style="width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;position: absolute;top: 0;left: 0;right: 0;bottom: 0;">Seleccionar</label>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="d-flex mt-2 row m-0 p-0">
+          <div class="col-md-4">
+            {{macros.btn(form.quitar, class="btn btn-danger col-md-12")}}
+          </div>
+          {% if modify %}
+          <div class="col-md-4">
+            {{macros.btn(form.modificar, class="btn btn-warning col-md-12")}}
+          </div> 
+          {% endif %} 
+          <div class="col-md-4">
+            {{macros.btn(form.terminar, class="btn btn-success col-md-12")}}
+          </div>                  
+        </div>
+      </div>
+      <div class="col-md-6 p-1">
+        <div class="card p-2 shadow h-100">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h4>Ventas</h4>
+            <div data-id="{{form.opTotales.id}}" style="display: none">
+              {{macros.checkbox(form.opTotales, onclick="showAdInput()")}}
+            </div>
+            <div>
+              {{macros.datos(form.opDia, onclick="showOpFechas()")}}
+            </div>
+          </div>
+          <div class="card-body" style="height: 80px;overflow-y: auto;">
+            {% for venta in ventas %}
+              <h6 class="fw-bold">{{venta.nombre}} - ${{venta.total}}</h6>
+            {% endfor %}
+          </div>
+          <div class="card-footer">
+            {% if ventas %}
+              <h5>Ventas Totales: ${{totales}}</h5>
+            {% endif %}
+            <div class="col-md-12" id="{{form.fechaConsulta.id}}">
+              {{macros.floatLabelField(form.fechaConsulta, placeholder="")}}
+            </div>
+            <div class="col-md-12" id="{{form.mes.id}}" style="display: none">
+              {{macros.camposNuevos(form.mes, class="form-select")}}
+            </div>
+            <div class="col-md-12" id="{{form.dia.id}}" style="display: none">
+              {{macros.camposNuevos(form.dia, class="form-select")}}
+            </div>
+            <div class="col-md-12">
+              {{macros.btn(form.verDatos, class="btn btn-primary col-md-12 mt-1")}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Confirmar Venta</h5>
+            <button type="button" class="close btn btn-outline-danger" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          {% with messages = get_flashed_messages() %}
+          {% if messages %}
+          {% for msg in messages %}
+          <div class="modal-body">
+            {{msg}}
+          </div>
+          {% endfor %}
+          {% endif %}
+          {% endwith %}
+          <div class="modal-footer">
+            {% import '_macros.html' as macros %}            
+            <div>
+              {{macros.btn(form.modificar, class="btn btn-secondary col-md-12")}}
+            </div>
+            <div>
+              {{macros.btn(form.enviarVenta, class="btn btn-success col-md-12")}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+<script src="{{ url_for('static', filename='js/myScripts.js') }}"></script>
+</div>
+
+{% endblock %}

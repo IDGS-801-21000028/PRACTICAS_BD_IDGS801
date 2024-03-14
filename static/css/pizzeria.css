@@ -1,0 +1,25 @@
+.table-container {
+  max-height: 250px;
+  overflow-y: auto;
+}
+.table-container thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.fila-orden {
+  cursor: pointer;
+}
+.fila-orden:hover,
+.fila-orden:hover td {
+  background-color: #f08989;
+}
+.fila-orden input[type="radio"] {
+  display: none;
+}
+tr.fila-orden-checked {
+  background-color: #e92626 !important;
+  color: white !important;
+  --bs-table-bg: transparent !important;
+}
